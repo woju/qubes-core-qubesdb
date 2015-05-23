@@ -629,11 +629,12 @@ int create_pidfile(struct db_daemon_data *d) {
     FILE *pidfile;
     mode_t old_umask;
 
-    /* do not create pidfile for VM daemon - service is managed by systemd */
     if (!d->remote_name)
-        return 1;
-    snprintf(pidfile_name, sizeof(pidfile_name),
-            "/var/run/qubes/qubesdb.%s.pid", d->remote_name);
+        snprintf(pidfile_name, sizeof(pidfile_name),
+                "/var/run/qubes/qubesdb.pid");
+    else
+        snprintf(pidfile_name, sizeof(pidfile_name),
+                "/var/run/qubes/qubesdb.%s.pid", d->remote_name);
 
     old_umask = umask(0002);
     pidfile = fopen(pidfile_name, "w");
@@ -650,11 +651,12 @@ int create_pidfile(struct db_daemon_data *d) {
 void remove_pidfile(struct db_daemon_data *d) {
     char pidfile_name[256];
 
-    /* no pidfile for VM daemon - service is managed by systemd */
     if (!d->remote_name)
-        return;
-    snprintf(pidfile_name, sizeof(pidfile_name),
-            "/var/run/qubes/qubesdb.%s.pid", d->remote_name);
+        snprintf(pidfile_name, sizeof(pidfile_name),
+                "/var/run/qubes/qubesdb.pid");
+    else
+        snprintf(pidfile_name, sizeof(pidfile_name),
+                "/var/run/qubes/qubesdb.%s.pid", d->remote_name);
 
     unlink(pidfile_name);
 }
