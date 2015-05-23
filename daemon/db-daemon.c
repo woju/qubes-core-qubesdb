@@ -19,12 +19,14 @@
 #include "buffer.h"
 
 #ifndef WINNT
+#ifdef HAVE_SYSTEMD
 /* For now link with systemd unconditionaly (all Fedora versions are using it,
  * Archlinux also). But if someone needs no systemd in dependencies,
  * it can be easily turned off, check the code in main() - conditions on
  * getenv("NOTIFY_SOCKET").
  */
 #include <systemd/sd-daemon.h>
+#endif
 #endif
 
 #ifdef WINNT
@@ -717,7 +719,11 @@ int main(int argc, char **argv) {
      * sucessful start */
     /* FIXME: OS dependent code */
 #ifndef WINNT
+#ifdef HAVE_SYSTEMD
     if (!getenv("NOTIFY_SOCKET")) {
+#else
+    if (1) {
+#endif
         char buf[6];
         char log_path[MAX_FILE_PATH];
         int log_fd;
@@ -849,9 +855,12 @@ int main(int argc, char **argv) {
     /* now ready for serving requests, notify parent */
     /* FIXME: OS dependent code */
 #ifndef WINNT
+#ifdef HAVE_SYSTEMD
     if (getenv("NOTIFY_SOCKET")) {
         sd_notify(1, "READY=1");
-    } else {
+    } else
+#endif
+    {
         if (write(ready_pipe[1], "ready", strlen("ready")) != strlen("ready"))
             perror("failed to notify parent");
         close(ready_pipe[1]);

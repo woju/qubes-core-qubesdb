@@ -2,11 +2,15 @@
 CFLAGS += -I../include -I. -g -Wall -Werror -pie
 EXEEXT =
 
+SYSTEMD ?= 1
+
 ifneq ($(OS),Windows_NT)
 CFLAGS += -fPIC -O2
-CFLAGS += `pkg-config --cflags libsystemd-daemon`
-CFLAGS += `pkg-config --cflags vchan-$(BACKEND_VMM)`
+ifeq ($(SYSTEMD),1)
+CFLAGS += `pkg-config --cflags libsystemd-daemon` -DHAVE_SYSTEMD
 LIBS += `pkg-config --libs libsystemd-daemon`
+endif
+CFLAGS += `pkg-config --cflags vchan-$(BACKEND_VMM)`
 LIBS += `pkg-config --libs vchan-$(BACKEND_VMM)`
 
 else # Windows_NT
